@@ -6,4 +6,150 @@ _Developed with Unreal Engine 5_
 # About the Project
 "Warehouse Wreckage" is the name of the first module in the course "Unreal Engine 5 C++ Developer: Learn C++ & Make Video Games" by GamedevTV. The premise is simple: knock over every object in the room with a limited supply of ammunition. However, the course does not implement any successful end condition; the player can only lose. I added a win condition myself, properly telegraphed that information to the player, and - to challenge myself - I did it all using Blueprints.
 
-The project is complete (for now...), but this section still needs to be completed. Check back soon for screenshots and a little insight into my process!
+# Demonstration
+video / screenshots
+
+# Development
+## The Original Project
+- physics
+- fire projectiles
+- importing assets
+- blueprint stuff
+
+And there we have it! A game about a person stood in a floating abandoned warehouse throwing metal bowling balls at whatever random garbage happens to be around them!
+
+## My Contribution
+Now, that doesn't really sounds like a _game_, does it? It's more of a sandbox than anything else, but there's no goal, no win state, and the fail state is completely silent and sudden.
+
+I wanted my contribution to make this demo into an actual game. To do that, I'd need to fix the issues above.
+
+### Falling Over
+First of all, I wanted the game to actually be able to track which props had fallen and which were still upright, then return true if all of them had been knocked over; this would make for a good win condition. If I was using Unity, I would slap a box collider on the bottom of the prop and call it a day. But this time, since I'm in a new engine, I thought I'd try to solve it a new way.
+
+That new way looks like this:
+
+IMAGE OF FALLING RADIUS
+
+What's happening when an object is falling over? Well, mathematically, it's rotating around a certain plane by a certain angle. In this case, the X and Y axes tilt the prop...
+
+X SPIN
+
+Y SPIN
+
+While the Z just kinda... _spins_ it...
+
+Z SPIN
+
+Using this, we can actually determine whether a prop has fallen over or not by its angular tilt! If it surpasses that angular tilt, then it has fallen over, otherwise it is still stood upright. I decided on a default tilt value of 45 degrees for both axes:
+
+IMAGE OF FALLING RADIUS WITH NUMBERS
+
+As you can see from the figure above, this number was not arbitrary; it falls exactly between perfectly upright and perfectly fallen (or perfectly perpendicular, if you will). For a prop to still be stood up at that angle, it would have to be truly magical...
+
+IMAGE OF MAGIC HAPPENING BC OF COURSE IT DOES
+
+Maybe 45 degrees was a bit too large... But it gets the job done, and for now, that's all that matters. We can fine-tune it later.
+
+The bounds of each prop are then fetched, creating two theoretical 45 degree angles, one tipping forwards from 0 degrees and one tipping backwards from 360 degrees.
+
+IMG OF FUNC
+
+If its rotation on the X OR Y axis happens to be in the range of:
+> (0 + _t_ < n < 360 - _t_, where _t_ is the angular tilt)
+
+Or (45 < n < 315) in this case, then it will be flagged as "fallen" in the main blueprint.
+
+IMG OF FUNC
+
+In an ideal world, this method would've worked for every prop in the game. But sadly, not all props work the same.
+
+The pallet prop was imported lying flat (as one would expect a pallet to be in a real-world context), but this didn't quite work, and I had no idea how to reimport it without the original fbx asset...
+
+It took me an embarrassingly long time to figure out, but this is effectively what it looks like:
+
+BARREL IN PALLET
+
+Now relate that to the graph from above (here it is again, for your reference):
+
+IMAGE OF FALLING RADIUS OVER PREV IMG
+
+Looking at it, the pallet (or any perpendicular object, for that matter), seems to be the _complete opposite_ of the upright barrel: when the barrel should be upright, the pallet should be be down, and vice versa. This means that the fall arc of a perpendicular object is actually the _inverse_ of a regular object.
+
+DIAGRAM OF THAT IDEA
+
+So if you use a NOT gate to invert the fall check, it should invert the theoretical segment:
+
+IMAGES SHOWING PALLETS LEANING AND STOOD
+
+And, lo and behold, the inverse segment works!
+
+IMAGE OF INVERSE WORKING
+
+This method still doesn't seem to work on negative values however. That still needs fixing, at some point...
+
+### Falling Through
+But what if, hypothetically, something went flying out the window...?
+
+IMAGE OF THAT
+
+Or, I don't know, through the floor...?
+
+IMAGE OF THAT TOO
+
+If that were to happen, they could end up flying off into the sunset, spinning forever. This could result in an unwinnable game state, as the flying objects constantly rotate between fallen and upright. No bueno.
+
+I set some upper and lower bounds in the main blueprint to combat this.
+
+IMG OF BP
+
+Then, once a prop falls out of range of those bounds, it counts as fallen.
+
+IMG OF BP
+
+They do despawn at some point...
+
+IMG OF NUMBER GOING DOWN?
+
+But it doesn't affect the completion rate, so that's good.
+
+### The Player
+I had to extract the projectile method from the main blueprint into the player in order to fetch the variables for the UI. However, to do that, I'd need to have a player in the first place...
+
+I went the easy route: I decided to import the First Person Example Level assets through the content window.
+
+I moved the projectile code over and exposed the ammo for the UI:
+
+IMG OF THAT
+
+Last, but by no means least, I prevented players from doing a Tommen Baratheon...
+
+GIF IF I CAN FIND ONE OR JUST GAME FOOTAGE
+
+I just kept the players within the same box as the props by resetting the level after they leave it.
+
+IMG OF BP
+
+In hindsight, I probably should've let them continue from where they left off. Maybe in the next update...
+
+### GUI
+The last thing it really needed to feel like a _game_ was a HUD.
+
+IMAGE OF HUD
+
+I not only included an ammo count so the player could manage their ammo carefully and avoid defeat, but also a prop count so they would know if they were close to winning. These numbers are variable - as you'd expect - and connect directly to the player.
+
+IMAGE OF BP
+
+Then, for the finishing touches, I added a win screen:
+
+WIN SCREEN IMG
+
+And a game over screen:
+
+GO SCREEN IMG
+
+### Conclusion
+With the addition of a proper win condition and a HUD that clearly communicates the state of the game with the player, it actually feels like a game. It still has a lot of room for improvement though! Maybe I'll revisit this project when I'm a little better trained.
+
+# Summary
+Thank you for reading! If you want to see more of my work, please check out my [portfolio](https://github.com/Xakaiczar/Portfolio), and if you have any questions or opportunities, please don't hesitate to drop me an [email](xaqatkins@virginmedia.com) or message me via [LinkedIn](https://www.linkedin.com/in/xaqatkins/)!
