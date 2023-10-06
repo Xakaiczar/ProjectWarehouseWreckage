@@ -11,10 +11,40 @@ video / screenshots
 
 # Development
 ## The Original Project
-- physics
-- fire projectiles
-- importing assets
-- blueprint stuff
+The original project is very simple. Aimed at beginners who are learning the engine for the first time, it covered the basics well. The lectures briefly run down:
+- Importing assets and using the provided assets
+- The physics-based properties attached to an object in the world
+- Using Unreal's Blueprints to reference and modify objects in the game
+
+Once all that's out the way, we're set to work on the core gameplay.
+
+First, I made a projectile with a simple sphere in a silver colour. This sphere was converted into a Blueprint Class and used as the projectile.
+
+BP IMG - PWW 1.1
+
+To fire a projectile, one first needs to be spawned into the world. Using a reference to the projectile blueprint made in the previous step, an instance of that class is created in the Main level blueprint and spawned in the world at the player's location using SpawnActor.
+
+PROJECTILE CODE
+
+The projectile is then fired. It was given an impulse, which is the force required to fire it from the player. This impulse is determined by finding the forward vector of the projectile, then multiplying that by a value that - in hindsight - should've been a variable. I'll fix that later.
+
+BP - PWW 1.3
+
+A rotational vector is applied to aim the projectile in the right direction, and another is used to determine where it needs to be fired from. TALK ABOUT CODE.
+
+I THINK I NEED AN IMAGE HERE
+
+The ammo is then tracked. TALK ABOUT CODE?
+
+AMMO TRACK CODE
+
+The level is reloaded when out of ammo. TALK ABOUT CODE?
+
+OUT OF AMMO CODE
+
+I also added in a manual reload for testing purposes.
+
+RELOAD CODE - PWW 1.7
 
 And there we have it! A game about a person stood in a floating abandoned warehouse throwing metal bowling balls at whatever random garbage happens to be around them!
 
@@ -30,23 +60,15 @@ That new way looks like this:
 
 IMAGE OF FALLING RADIUS
 
-What's happening when an object is falling over? Well, mathematically, it's rotating around a certain plane by a certain angle. In this case, the X and Y axes tilt the prop...
+What's happening when an object is falling over? Well, mathematically, it's rotating around a certain plane by a certain angle. In this case, the X and Y axes tilt the prop, while the Z just kinda... _spins_ it...
 
-X SPIN
-
-Y SPIN
-
-While the Z just kinda... _spins_ it...
-
-Z SPIN
-
-Using this, we can actually determine whether a prop has fallen over or not by its angular tilt! If it surpasses that angular tilt, then it has fallen over, otherwise it is still stood upright. I decided on a default tilt value of 45 degrees for both axes:
+Using this, we can actually determine whether a prop has fallen over or not by its angular tilt! If it surpasses a maximum tilt, then it has fallen over, otherwise it is still stood upright. I decided on a default maximum tilt value of 45 degrees for both axes:
 
 IMAGE OF FALLING RADIUS WITH NUMBERS
 
 As you can see from the figure above, this number was not arbitrary; it falls exactly between perfectly upright and perfectly fallen (or perfectly perpendicular, if you will). For a prop to still be stood up at that angle, it would have to be truly magical...
 
-IMAGE OF MAGIC HAPPENING BC OF COURSE IT DOES
+GIF OF MAGIC HAPPENING BC OF COURSE IT DOES
 
 Maybe 45 degrees was a bit too large... But it gets the job done, and for now, that's all that matters. We can fine-tune it later.
 
@@ -117,7 +139,7 @@ I had to extract the projectile method from the main blueprint into the player i
 
 I went the easy route: I decided to import the First Person Example Level assets through the content window.
 
-I moved the projectile code over and exposed the ammo for the UI:
+I moved the SpawnProjectile code over, refactored it, and exposed the ammo for the UI:
 
 IMG OF THAT
 
