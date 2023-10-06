@@ -20,7 +20,7 @@ Once all that's out the way, we're set to work on the core gameplay.
 
 First, I made a projectile with a simple sphere in a silver colour. This sphere was converted into a Blueprint Class and used as the projectile.
 
-BP IMG - PWW 1.1
+![Image PWW 1.1 - Blueprint Class for projectile](https://github.com/Xakaiczar/Portfolio/blob/main/images/PWW/PWW%20-%201.1.png)
 
 To fire a projectile, one first needs to be spawned into the world. Using a reference to the projectile blueprint made in the previous step, an instance of that class is created in the Main level blueprint and spawned in the world at the player's location using SpawnActor.
 
@@ -28,7 +28,7 @@ PROJECTILE CODE
 
 The projectile is then fired. It was given an impulse, which is the force required to fire it from the player. This impulse is determined by finding the forward vector of the projectile, then multiplying that by a value that - in hindsight - should've been a variable. I'll fix that later.
 
-BP - PWW 1.3
+![Image PWW 1.3 - Blueprint Code of projectile launch code](https://github.com/Xakaiczar/Portfolio/blob/main/images/PWW/PWW%20-%201.3.png)
 
 A rotational vector is applied to aim the projectile in the right direction, and another is used to determine where it needs to be fired from. TALK ABOUT CODE.
 
@@ -44,7 +44,7 @@ OUT OF AMMO CODE
 
 I also added in a manual reload for testing purposes.
 
-RELOAD CODE - PWW 1.7
+![Image PWW 1.7 - Blueprint Code of reload code](https://github.com/Xakaiczar/Portfolio/blob/main/images/PWW/PWW%20-%201.7.png)
 
 And there we have it! A game about a person stood in a floating abandoned warehouse throwing metal bowling balls at whatever random garbage happens to be around them!
 
