@@ -22,7 +22,7 @@ First, I made a projectile with a simple sphere in a silver colour. This sphere 
 
 ![Image PWW 1.1 - Blueprint Class for projectile](https://github.com/Xakaiczar/Portfolio/blob/main/images/PWW/PWW%20-%201.1.png)
 
-To fire a projectile, one first needs to be spawned into the world. Using a reference to the projectile blueprint made in the previous step, an instance of that class is created in the Main level blueprint and spawned in the world at the player's location using SpawnActor.
+Before we can fire a projectile, one needs to be spawned into the world. Using a reference to the projectile blueprint made in the previous step, an instance of that class is created in the Main level blueprint and spawned in the world at the player's location using SpawnActor.
 
 PROJECTILE CODE
 
@@ -56,17 +56,26 @@ I wanted my contribution to make this demo into an actual game. To do that, I'd 
 ### Falling Over
 First of all, I wanted the game to actually be able to track which props had fallen and which were still upright, then return true if all of them had been knocked over; this would make for a good win condition. If I was using Unity, I would slap a box collider on the bottom of the prop and call it a day. But this time, since I'm in a new engine, I thought I'd try to solve it a new way.
 
-That new way looks like this:
-
-IMAGE OF FALLING RADIUS
-
 What's happening when an object is falling over? Well, mathematically, it's rotating around a certain plane by a certain angle. In this case, the X and Y axes tilt the prop, while the Z just kinda... _spins_ it...
 
-Using this, we can actually determine whether a prop has fallen over or not by its angular tilt! If it surpasses a maximum tilt, then it has fallen over, otherwise it is still stood upright. I decided on a default maximum tilt value of 45 degrees for both axes:
+IMAGE OF VARIOUS TILTS
 
-IMAGE OF FALLING RADIUS WITH NUMBERS
+Using this, we can actually determine whether a prop has fallen over or not by its angular tilt!
 
-As you can see from the figure above, this number was not arbitrary; it falls exactly between perfectly upright and perfectly fallen (or perfectly perpendicular, if you will). For a prop to still be stood up at that angle, it would have to be truly magical...
+PWW 2.2 - IMG OF GRAPH
+> (_a_ < n < 360 - _a_, where _a_ is the angular tilt)
+
+If its rotation on the X OR Y axis happens to be in the range above (which includes positive and negative rotations), it will be considered upright and nothing will change. However, if it exceeds those bounds, then it has fallen over and the game needs to be updated.
+
+I decided on a default angular tilt value of 45 degrees for both axes:
+
+PWW 2.3 - IMAGE OF FALLING RADIUS GRAPH WITH NUMBERS
+
+As you can see from the figure below, this number was not arbitrary; it falls exactly between perfectly upright and perfectly fallen (or perfectly perpendicular, if you will):
+
+IMG OF ANGLE
+
+For a prop to still be stood up at that angle, it would have to be truly magical...
 
 GIF OF MAGIC HAPPENING BC OF COURSE IT DOES
 
@@ -76,10 +85,7 @@ The bounds of each prop are then fetched, creating two theoretical 45 degree ang
 
 IMG OF FUNC
 
-If its rotation on the X OR Y axis happens to be in the range of:
-> (0 + _t_ < n < 360 - _t_, where _t_ is the angular tilt)
-
-Or (45 < n < 315) in this case, then it will be flagged as "fallen" in the main blueprint.
+If the prop's rotation on the X OR Y axis happens to exceed the range of (45 < n < 315), then it will be flagged as "fallen" in the main blueprint.
 
 IMG OF FUNC
 
