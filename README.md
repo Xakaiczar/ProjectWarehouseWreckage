@@ -20,30 +20,31 @@ Once all that's out the way, we're set to work on the core gameplay.
 
 First, I made a projectile with a simple sphere in a silver colour. This sphere was converted into a Blueprint Class and used as the projectile.
 
-![Image PWW 1.1 - Blueprint Class for projectile](https://github.com/Xakaiczar/Portfolio/blob/main/images/PWW/PWW%20-%201.1.png)
+![Image PWW 1.1 - Blueprint Class for Projectile](https://github.com/Xakaiczar/Portfolio/blob/main/images/PWW/PWW%20-%201.1.png)
 
 Before we can fire a projectile, one needs to be spawned into the world. Using a reference to the projectile blueprint made in the previous step, an instance of that class is created in the Main level blueprint and spawned in the world just ahead of the player's location using SpawnActor (100 units in the forward direction).
 
-IMAGE - PWW 1.2
+![Image PWW 1.2 - Blueprint function for SpawnProjectile](https://github.com/Xakaiczar/Portfolio/blob/main/images/PWW/PWW%20-%201.2.png)
 
 The projectile is then fired. It is given an impulse, which is the force over time required to produce momentum, causing the projectile to fly away from the player. This impulse is determined by finding the forward vector of the projectile, then multiplying that by a value that - in hindsight - should've been a variable. I'll fix that later.
 
-![Image PWW 1.3 - Blueprint Code of projectile launch code](https://github.com/Xakaiczar/Portfolio/blob/main/images/PWW/PWW%20-%201.3.png)
+![Image PWW 1.3 - Blueprint function for Launch](https://github.com/Xakaiczar/Portfolio/blob/main/images/PWW/PWW%20-%201.3.png)
 
 This function is then added to the character's event graph, triggering when the left mouse button is clicked.
 
-IMAGE - PWW 1.4
+![Image PWW 1.4 - Blueprint function for lmb click](https://github.com/Xakaiczar/Portfolio/blob/main/images/PWW/PWW%20-%201.4.png)
 
 As you can see, there are two other nodes here too: one that decreases the ammo when a projectile is fired, and one that tracks the ammo remaining. The latter stops projectiles from being fired when there are none left.
 
 The former is pretty straightforward too. It looks a bit ugly in BP:
 
-IMAGE - PWW 1.5
+![Image PWW 1.5 - Blueprint function for DecreaseAmmo](https://github.com/Xakaiczar/Portfolio/blob/main/images/PWW/PWW%20-%201.5.png)
 
 But in code this would essentially amount to:
 ```c++
 ammo -= 1;
 ```
+> Note: I have since changed this, adding a `max` node before the `set`. The `max` compares `Ammo` to `0` and returning the lowest, meaning the player can never have negative ammo.
 
 In the level blueprint, the game is reloaded when the player is out of ammo. I also added in a manual reload for testing purposes.
 
