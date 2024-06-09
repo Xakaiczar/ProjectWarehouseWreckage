@@ -70,36 +70,52 @@ Now, that doesn't really sounds like a _game_, does it? It's more of a sandbox t
 I wanted my contribution to make this demo into an actual game. To do that, I'd need to fix the issues above.
 
 ### Falling Over
-First of all, I wanted the game to actually be able to track which props had fallen and which were still upright, then return true if all of them had been knocked over; this would make for a good win condition. If I was using Unity, I would slap a box collider on the bottom of the prop and call it a day. But this time, since I'm in a new engine, I thought I'd try to solve it a new way.
+First of all, I wanted the game to actually be able to track which props had fallen and which were still upright, then return true if all of them had been knocked over; this would make for a good win condition. If I was using Unity, I would probably slap a box collider on the bottom of the prop and call it a day. But this time, since I'm in a new engine, I thought I'd try to solve it a new way.
 
-What's happening when an object is falling over? Well, mathematically, it's rotating around a certain plane by a certain angle. In this case, the X and Y axes tilt the prop, while the Z just kinda... _spins_ it...
-
-IMAGE OF VARIOUS TILTS
+What's happening when an object is falling over? Well, mathematically, it's rotating around a certain plane by a certain angle until it becomes unbalanced and gravity does the rest of the work. In this case, the X and Y axes tilt the prop, while the Z just kinda... _spins_ it...
 
 Using this, we can actually determine whether a prop has fallen over or not by its angular tilt!
 
-PWW 2.2 - IMG OF GRAPH
+IMAGE - PWW 2.1
 > (_a_ < n < 360 - _a_, where _a_ is the angular tilt)
 
-If its rotation on the X OR Y axis happens to be in the range above (which includes positive and negative rotations), it will be considered upright and nothing will change. However, if it exceeds those bounds, then it has fallen over and the game needs to be updated.
+The idea here is that a prop must rotate by an angle of _`a`_ before it starts falling with no hope of return. Inversely, this means that any prop with an `x` or `y` rotation of 45 degrees or lower must still be stood up, to some degree (no pun intended...).
+
+This is then mirrored on the other side, as an angle of _`-a`_ will cause it to fall the other way. Unreal doesn't seem to like negative angles very much (as far as I can tell), so I'm instead subtracting it from 360 degrees, which is fundamentally the same thing.
 
 I decided on a default angular tilt value of 45 degrees for both axes:
 
-PWW 2.3 - IMAGE OF FALLING RADIUS GRAPH WITH NUMBERS
+IMAGE - PWW 2.2
 
-As you can see from the figure below, this number was not arbitrary; it falls exactly between perfectly upright and perfectly fallen (or perfectly perpendicular, if you will):
+As you can see from the figure above and the image below, this number was not arbitrary; it falls exactly between perfectly upright and perfectly fallen:
 
-IMG OF ANGLE
+IMAGE - PWW 2.3
 
-For a prop to still be stood up at that angle, it would have to be truly magical...
+Maybe 45 degrees is a bit too large for some props, but it gets the job done; for now, that's all that matters. We can fine-tune it on a case-by-case basis later.
 
-GIF OF MAGIC HAPPENING BC OF COURSE IT DOES
+To determine if a prop as fallen, we need to get these boundaries. I wrote this function called `GetTiltBounds`:
 
-Maybe 45 degrees was a bit too large... But it gets the job done, and for now, that's all that matters. We can fine-tune it later.
+IMAGE - PWW 2.4
 
-The bounds of each prop are then fetched, creating two theoretical 45 degree angles, one tipping forwards from 0 degrees and one tipping backwards from 360 degrees.
+This function takes in one parameter - `Angle`, which we'll get to later - and returns two values: a `MinTilt` and a `MaxTilt`. While not very well named, these return values are the upper and lower bounds for the prop's rotation. In other words, the prop must be between `MinTilt` and `MaxTilt` to be considered "fallen".
 
-IMG OF FUNC
+The graph looks more complex than it is. In C++ it would look like this:
+```C++
+float a = ToppleTilt % Angle;
+float b = (360 - ToppleTilt) % Angle;
+
+MinTilt = min(a, b);
+MaxTilt = max(a, b);
+```
+Where `ToppleTilt` is the variable angular tilt the prop would need to fall to be considered "fallen", mentioned earlier and defaulted to `45`.
+
+It starts by getting the remainder of the `ToppleTilt` divided by the `Angle`, on the off chance the `ToppleTilt` causes over-rotation. In this case, if `ToppleTilt = 405`, it would still return `45`. It then also does the same for `-ToppleTilt`, as mentioned before.
+
+The smallest of the two values is passed to `MinTilt`, and the largest is passed to `MaxTilt`.
+
+These values get passed into a much more convoluted function:
+
+IMAGE - PWW 2.5
 
 If the prop's rotation on the X OR Y axis happens to exceed the range of (45 < n < 315), then it will be flagged as "fallen" in the main blueprint.
 
