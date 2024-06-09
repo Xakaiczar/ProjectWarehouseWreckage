@@ -22,29 +22,30 @@ First, I made a projectile with a simple sphere in a silver colour. This sphere 
 
 ![Image PWW 1.1 - Blueprint Class for projectile](https://github.com/Xakaiczar/Portfolio/blob/main/images/PWW/PWW%20-%201.1.png)
 
-Before we can fire a projectile, one needs to be spawned into the world. Using a reference to the projectile blueprint made in the previous step, an instance of that class is created in the Main level blueprint and spawned in the world at the player's location using SpawnActor.
+Before we can fire a projectile, one needs to be spawned into the world. Using a reference to the projectile blueprint made in the previous step, an instance of that class is created in the Main level blueprint and spawned in the world just ahead of the player's location using SpawnActor (100 units in the forward direction).
 
-PROJECTILE CODE
+IMAGE - PWW 1.2
 
-The projectile is then fired. It was given an impulse, which is the force required to fire it from the player. This impulse is determined by finding the forward vector of the projectile, then multiplying that by a value that - in hindsight - should've been a variable. I'll fix that later.
+The projectile is then fired. It is given an impulse, which is the force over time required to produce momentum, causing the projectile to fly away from the player. This impulse is determined by finding the forward vector of the projectile, then multiplying that by a value that - in hindsight - should've been a variable. I'll fix that later.
 
 ![Image PWW 1.3 - Blueprint Code of projectile launch code](https://github.com/Xakaiczar/Portfolio/blob/main/images/PWW/PWW%20-%201.3.png)
 
-A rotational vector is applied to aim the projectile in the right direction, and another is used to determine where it needs to be fired from. TALK ABOUT CODE.
+This function is then added to the character's event graph, triggering when the left mouse button is clicked.
 
-I THINK I NEED AN IMAGE HERE
+IMAGE - PWW 1.4
 
-The ammo is then tracked. TALK ABOUT CODE?
+As you can see, there are two other nodes here too: one that decreases the ammo when a projectile is fired, and one that tracks the ammo remaining. The latter stops projectiles from being fired when there are none left.
 
-AMMO TRACK CODE
+The former is pretty straightforward too. It looks a bit ugly in BP:
 
-The level is reloaded when out of ammo. TALK ABOUT CODE?
+IMAGE - PWW 1.5
 
-OUT OF AMMO CODE
+But in code this would essentially amount to:
+```c++
+ammo -= 1;
+```
 
-I also added in a manual reload for testing purposes.
-
-![Image PWW 1.7 - Blueprint Code of reload code](https://github.com/Xakaiczar/Portfolio/blob/main/images/PWW/PWW%20-%201.7.png)
+In the level blueprint, the game is reloaded when the player is out of ammo. I also added in a manual reload for testing purposes.
 
 And there we have it! A game about a person stood in a floating abandoned warehouse throwing metal bowling balls at whatever random garbage happens to be around them!
 
