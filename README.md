@@ -40,7 +40,7 @@ Before we can fire a projectile, one needs to be spawned into the world. Using a
 
 ![Image PWW 1.2 - Blueprint function for SpawnProjectile](https://github.com/Xakaiczar/Portfolio/blob/main/images/PWW/PWW%20-%201.2.png)
 
-The projectile is then fired using the `Launch` function. It is given an impulse, which is the force over time required to produce momentum, causing the projectile to fly away from the player. This impulse is determined by finding the forward vector of the projectile, then multiplying that by a value that - in hindsight - should've been a variable. I'll fix that later.
+The projectile is then fired using the `Launch` function. It is given an impulse, which is the force over a time period required to produce momentum, causing the projectile to fly away from the player. This impulse is determined by finding the forward vector of the projectile, then multiplying that by a value that - in hindsight - should've been a variable. I'll fix that later.
 
 ![Image PWW 1.3 - Blueprint function for Launch](https://github.com/Xakaiczar/Portfolio/blob/main/images/PWW/PWW%20-%201.3.png)
 
