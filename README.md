@@ -1,13 +1,26 @@
 # Project "Warehouse Wreckage"
 _Developed with Unreal Engine 5_
 
-**DISCLAIMER**: This project is based heavily on "Warehouse Wreckage", the first module of "Unreal Engine 5 C++ Developer: Learn C++ & Make Video Games" by GamedevTV. Most of the code will have been written and designed by me, and it may differ significantly as I diverge from the lecturer to solve the problem myself. However, all work here is inspired by - and heavily derivative of - work that is not my own, therefore this project is not my own and cannot be distributed. This project is for assessment by prospective employers only.
+**DISCLAIMER**: This project is based heavily on "Warehouse Wreckage", the first module of _Unreal Engine 5 C++ Developer: Learn C++ & Make Video Games_ by GameDevTV. Most of the code will have been written and designed by me, and it may differ significantly as I diverge from the lecturer to solve the problem myself. However, all work here is inspired by - and heavily derivative of - work that is not my own, therefore this project is not my own and cannot be distributed. This project is for assessment by prospective employers only.
+
+## Contents
+- [About the Project](#about-the-project)
+- [Demonstration](#demonstration)
+- [Development](#development)
+  - [The Original Project](#the-original-project)
+  - [My Contribution](#my-contribution)
+    - [Falling Over](#falling-over)
+    - [Falling Through](#falling-through)
+    - [The Player](#the-player)
+    - [GUI](#gui)
+    - [Conclusion](#conclusion)
+- [Summary](#summary)
 
 # About the Project
-"Warehouse Wreckage" is the name of the first module in the course "Unreal Engine 5 C++ Developer: Learn C++ & Make Video Games" by GamedevTV. The premise is simple: knock over every object in the room with a limited supply of ammunition. However, the course does not implement any successful end condition; the player can only lose. I added a win condition myself, properly telegraphed that information to the player, and - to challenge myself - I did it all using Blueprints.
+"Warehouse Wreckage" is the name of the first module in the course _Unreal Engine 5 C++ Developer: Learn C++ & Make Video Games_ by GameDevTV ([Udemy](https://www.udemy.com/course/unrealcourse/) / [GameDevTV](https://www.gamedev.tv/courses/unreal-5-0-c-developer-learn-c-and-make-video-games)). The premise is simple: knock over every object in the room with a limited supply of ammunition. However, the course does not implement any successful end condition; the player can only lose. I added a win condition myself, properly telegraphed that information to the player, and - to challenge myself - I did it all using Blueprints.
 
 # Demonstration
-video / screenshots
+A video will be uploaded soon!
 
 # Development
 ## The Original Project
