@@ -36,15 +36,17 @@ First, I made a projectile with a simple sphere in a silver colour. This sphere 
 
 ![Image PWW 1.1 - Blueprint Class for Projectile](https://github.com/Xakaiczar/Portfolio/blob/main/images/PWW/PWW%20-%201.1.png)
 
-Before we can fire a projectile, one needs to be spawned into the world. Using a reference to the projectile blueprint made in the previous step, an instance of that class is created in the `Main` level blueprint and spawned in the world just ahead of the player's location using `SpawnActor` (100 units in the forward direction).
+Before we can fire a projectile, one needs to be spawned into the world. Using a reference to the projectile blueprint made in the previous step, an instance of that class is created in the `BP_FirstPersonCharacter` blueprint and spawned in the world just ahead of the player's location using `SpawnActor` (100 units in the forward direction).
 
 ![Image PWW 1.2 - Blueprint function for SpawnProjectile](https://github.com/Xakaiczar/Portfolio/blob/main/images/PWW/PWW%20-%201.2.png)
+>[!NOTE]
+>_Pictured above is a function called `SpawnProjectile`. In the current build however, `SpawnProjectile` no longer calls `Launch`. Both of these functions - as well as `DecreaseAmmo` - are instead sequentially called in `FireProjectile`. I will update images and descriptions when I have time, but it works fundamentally the same, it was just a simple refactor._
 
 The projectile is then fired using the `Launch` function. It is given an impulse, which is the force over a time period required to produce momentum, causing the projectile to fly away from the player. This impulse is determined by finding the forward vector of the projectile, then multiplying that by a value that - in hindsight - should've been a variable. I'll fix that later.
 
 ![Image PWW 1.3 - Blueprint function for Launch](https://github.com/Xakaiczar/Portfolio/blob/main/images/PWW/PWW%20-%201.3.png)
 
-This set of nodes is then added to the character's event graph, triggering when the left mouse button is clicked.
+This set of nodes is then added to the `BP_FirstPersonCharacter`'s event graph, triggering when the left mouse button is clicked.
 
 ![Image PWW 1.4 - Blueprint function for lmb click](https://github.com/Xakaiczar/Portfolio/blob/main/images/PWW/PWW%20-%201.4.png)
 
@@ -58,7 +60,8 @@ But in code this would essentially amount to:
 ```c++
 ammo -= 1;
 ```
-> Note: I have since changed this, adding a `max` node before the `set`. The `max` compares `Ammo` to `0` and returning the lowest, meaning the player can never have negative ammo.
+> [!NOTE]
+> _I have since changed this, adding a `max` node before the `set`. The `max` compares `Ammo` to `0` and returns the lowest, meaning the player can never have negative ammo._
 
 In the `Main` level blueprint, the game is reloaded when the player is out of ammo (more on that graph later!). I also added in a manual reload for testing purposes.
 
@@ -93,7 +96,7 @@ IMAGE - PWW 2.3
 
 Maybe 45 degrees is a bit too large for some props, but it gets the job done; for now, that's all that matters. We can fine-tune it on a case-by-case basis later.
 
-To determine if a prop as fallen, we need to get these boundaries. I wrote this function called `GetTiltBounds`:
+To determine if a prop has fallen, we need to get these boundaries. I wrote this function called `GetTiltBounds`:
 
 IMAGE - PWW 2.4
 
@@ -104,10 +107,10 @@ The graph looks more complex than it is. In C++ it would look like this:
 float a = ToppleTilt % Angle;
 float b = (360 - ToppleTilt) % Angle;
 
-MinTilt = min(a, b);
-MaxTilt = max(a, b);
+float MinTilt = min(a, b);
+float MaxTilt = max(a, b);
 ```
-Where `ToppleTilt` is the variable angular tilt the prop would need to fall to be considered "fallen", mentioned earlier and defaulted to `45`.
+> _Where `ToppleTilt` is the variable angular tilt the prop would need to fall to be considered "fallen", mentioned earlier and defaulted to `45`._
 
 It starts by getting the remainder of the `ToppleTilt` divided by the `Angle`, on the off chance the `ToppleTilt` causes over-rotation. In this case, if `ToppleTilt = 405`, it would still return `45`. It then also does the same for `-ToppleTilt`, as mentioned before.
 
