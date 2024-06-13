@@ -120,35 +120,80 @@ These values get passed into a much more convoluted function:
 
 IMAGE - PWW 2.5
 
-If the prop's rotation on the X OR Y axis happens to exceed the range of (45 < n < 315), then it will be flagged as "fallen" in the main blueprint.
+The function above - `HasTiltedTooFar` - calls `GetTiltAngle` and passes the result to `GetTiltBounds` (more on that later!). The `MinTilt` and `MaxTilt` are then compared with the rotation of the prop; if the prop's rotation on the `x` _or_ `y` axis falls outside the safe range and into the fallen range of `MinTilt < n < MaxTilt`, then it will be flagged as "fallen" in the `Main` blueprint.
 
-IMG OF FUNC
+To make it readable, I will once again condense down a complex-looking graph into code. In C++ it would look like this:
+```C++
+float x = abs(Rotation.X);
+float y = abs(Rotation.Y);
 
-In an ideal world, this method would've worked for every prop in the game. But sadly, not all props work the same.
+bool HasFallenOnX = MinTilt < x && x < MaxTilt;
+bool HasFallenOnY = MinTilt < y && y < MaxTilt;
 
-The pallet prop was imported lying flat (as one would expect a pallet to be in a real-world context), but this didn't quite work, and I had no idea how to reimport it without the original fbx asset...
+bool HasFallen = HasFallenOnX || HasFallenOnY;
+```
 
-It took me an embarrassingly long time to figure out, but this is effectively what it looks like:
+Now, I'm sure you're wondering: "What about `InvertTilt` and the XOR? What about that mysterious `Angle` you keep referring to?"
 
-BARREL IN PALLET
+In an ideal world, the method above would've worked for every prop in the game. But sadly, not all props work the same.
 
-Now relate that to the graph from above (here it is again, for your reference):
+For example, the pallet prop was imported lying flat (as one would expect a pallet to be in a real-world context). But this didn't quite work in this context, as this meant that its default state was along the floor, while standing it up would actually trigger the prop as fallen.
 
-IMAGE OF FALLING RADIUS OVER PREV IMG
+It took me an embarrassingly long time to figure out, but this is effectively what is happening and how I visualised it:
 
-Looking at it, the pallet (or any perpendicular object, for that matter), seems to be the _complete opposite_ of the upright barrel: when the barrel should be upright, the pallet should be be down, and vice versa. This means that the fall arc of a perpendicular object is actually the _inverse_ of a regular object.
+IMAGE - PWW 2.6
 
-DIAGRAM OF THAT IDEA
+Now relate that to the graph from earlier (here it is again, for your reference):
 
-So if you use a NOT gate to invert the fall check, it should invert the theoretical segment:
+IMAGE - PWW 2.7
 
-IMAGES SHOWING PALLETS LEANING AND STOOD
+Frustratingly, an object lying parallel with the floor appears to be the _complete opposite_ of their upright, perpendicular counterparts: when they are within the safe tilt bounds, they are actually _closer_ to the floor than when they should be "falling".
 
-And, lo and behold, the inverse segment works!
+My first instinct was just to rotate the prop visual in the editor; this is a simple trick I use in Unity all the time. But being new to the engine, I couldn't figure for the life of me how to do it, and I had no idea how to reimport it without the original fbx asset...
 
-IMAGE OF INVERSE WORKING
+So, once again, I had to do it the _hard way_...
 
-This method still doesn't seem to work on negative values however. That still needs fixing, at some point...
+I went through a few mathematical options, trying to adjust the bounds by the angular offset and the like, when I stumbled upon a startlingly simple solution.
+
+If you look again at the diagram above, you'll probably notice the same thing I did: if you rotated that whole barrel-pallet abomination 90 degrees in either direction, it would not only make the barrel fall, but the pallet stand. In other words, the fall arc of a parallel object is actually the _inverse_ of a perpendicular object!
+
+So for _some_ objects, I needed to ensure that the unsafe bounds (`MinTilt < n < MaxTilt`) became the _safe_ bounds, and vice versa.
+
+Again, I'm sure this can be done mathematically, but logically works too!
+
+I first tried to NOT the original output under certain conditions, but after drawing up a little truth table, I realised what I wanted was a XOR gate. In plain English that would equate to:
+> - If the object is not outside the bounds and is not parallel to the floor by default, it's not fallen on the floor (false) - this describes a perpendicular object stood upright
+> - If the object is not outside the bounds and is parallel to the floor by default, it's fallen on the floor (true) - this describes a parallel object lying flat
+> - If the object is outside the bounds and is not parallel to the floor by default, it's fallen on the floor (true) - this describes a perpendicular object lying flat
+> - If the object is outside the bounds and is parallel to the floor by default, it's not fallen on the floor (false) - this describes a parallel object stood upright
+
+And, lo and behold, it works! _Kinda_...
+
+Actually, it highlighted a _different_ issue I had.
+
+If the pallet fell on its bottom side it correctly flagged as having fallen, but if it fell on its _top_ side it was still considered upright.
+
+This was actually true of _all_ props, I just never successfully made a barrel flip onto its top before, for obvious skill-issue-based reasons. Also, some props _needed_ to be upside-down, in case their sides were too narrow to support them (e.g. the hose).
+
+This is where that fabled `Angle` comes in to save the day!
+
+If you're a smarter person than me, you may have noticed that all my calculations were based off a 360 degree arc around the object, while all my diagrams were based off a 180 degree arc. In other words, I was holding two different ideas of how this would work simultaneously, then somehow got confused when I realised they contradicted each other...
+
+Clearly, some objects were basically the same upside-down, so they needed to have _two_ safe zones: one around 0 degrees, and one around 180 degrees. I made `GetTiltAngle` to represent this:
+
+IMAGE - PWW 2.8
+
+This then gets fed into `GetTiltBounds`, where it... _just works_...
+
+I was actually surprised when it worked, and I'm _still_ surprised it works, because I'm honestly not quite sure _how_ or _why_ it works! My best guess: the modulus I implemented in `GetTiltBounds` - the one that stops the angles from overflowing outside 360 degrees - might be dividing the area up for me.
+
+Weirdly though, it only works as intended at 360 degrees and 180 degrees. If you set it to 120 degrees (i.e. the circle is split into 3), it still only gives 2 areas instead of 3, as does an angle of 90 degrees (a circle split into 4).
+
+Weirder still, while there are only 2 areas, they each start and end _exactly_ where you'd expect; the bounds around 0 are completely correct, as are the start bound around the second division and the end bound around the final division. For example, if we assume a `ToppleTilt` of `10` and an angle of `120`, the bounds around 0 will be correct (`-10 < n < 10`), but the second division (`110 < n < 130`) and third division (`230 < n < 250`) are replaced by a single bound (`110 < n < 250`).
+
+So those values are still _used_ properly, it's just that all but the first fuse into one _giga_-bound!
+
+Maybe I'm just too ill to understand this at the moment. I think I'll need to give it a look-over another time...
 
 ### Falling Through
 But what if, hypothetically, something went flying out the window...?
