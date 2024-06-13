@@ -79,28 +79,28 @@ What's happening when an object is falling over? Well, mathematically, it's rota
 
 Using this, we can actually determine whether a prop has fallen over or not by its angular tilt!
 
-IMAGE - PWW 2.1
+![Image PWW 2.1 - Angular Tilt Graph](https://github.com/Xakaiczar/Portfolio/blob/main/images/PWW/PWW%20-%202.1.png)
 > (_a_ < n < 360 - _a_, where _a_ is the angular tilt)
 
-The idea here is that a prop must rotate by an angle of _`a`_ before it starts falling with no hope of return. Inversely, this means that any prop with an `x` or `y` rotation of 45 degrees or lower must still be stood up, to some degree (no pun intended...).
+The idea here is that a prop must rotate by an angle of _`a`_ before it starts falling with no hope of return. Inversely, this means that any prop with an `x` or `y` rotation of _`a`_ degrees or lower must still be stood up, to some degree (no pun intended...).
 
 This is then mirrored on the other side, as an angle of _`-a`_ will cause it to fall the other way. Unreal doesn't seem to like negative angles very much (as far as I can tell), so I'm instead subtracting it from 360 degrees, which is fundamentally the same thing.
 
 I decided on a default angular tilt value of 45 degrees for both axes:
 
-IMAGE - PWW 2.2
+![Image PWW 2.2 - Angular Tilt Graph Filled](https://github.com/Xakaiczar/Portfolio/blob/main/images/PWW/PWW%20-%202.2.png)
 
 As you can see from the figure above and the image below, this number was not arbitrary; it falls exactly between perfectly upright and perfectly fallen:
 
-IMAGE - PWW 2.3
+![Image PWW 2.3 - Angular Tilt Barrel](https://github.com/Xakaiczar/Portfolio/blob/main/images/PWW/PWW%20-%202.3.png)
 
 Maybe 45 degrees is a bit too large for some props, but it gets the job done; for now, that's all that matters. We can fine-tune it on a case-by-case basis later.
 
 To determine if a prop has fallen, we need to get these boundaries. I wrote this function called `GetTiltBounds`:
 
-IMAGE - PWW 2.4
+![Image PWW 2.4 - Get Tilt Bounds](https://github.com/Xakaiczar/Portfolio/blob/main/images/PWW/PWW%20-%202.4.png)
 
-This function takes in one parameter - `Angle`, which we'll get to later - and returns two values: a `MinTilt` and a `MaxTilt`. While not very well named, these return values are the upper and lower bounds for the prop's rotation. In other words, the prop must be between `MinTilt` and `MaxTilt` to be considered "fallen".
+This function takes in one parameter - `Angle`, which we'll get to later, but defaults to `360` - and returns two values: a `MinTilt` and a `MaxTilt`. While not very well named, these return values are the upper and lower bounds for the prop's rotation. In other words, the prop must be between `MinTilt` and `MaxTilt` to be considered "fallen".
 
 The graph looks more complex than it is. In C++ it would look like this:
 ```C++
@@ -112,13 +112,13 @@ float MaxTilt = max(a, b);
 ```
 > _Where `ToppleTilt` is the variable angular tilt the prop would need to fall to be considered "fallen", mentioned earlier and defaulted to `45`._
 
-It starts by getting the remainder of the `ToppleTilt` divided by the `Angle`, on the off chance the `ToppleTilt` causes over-rotation. In this case, if `ToppleTilt = 405`, it would still return `45`. It then also does the same for `-ToppleTilt`, as mentioned before.
+It starts by getting the remainder of the `ToppleTilt` divided by the `Angle`, on the off chance the `ToppleTilt` is impossible due to over-rotation. In this case, if `ToppleTilt = 405`, it would still return `45`. It then also does the same for `-ToppleTilt`, as mentioned before.
 
 The smallest of the two values is passed to `MinTilt`, and the largest is passed to `MaxTilt`.
 
 These values get passed into a much more convoluted function:
 
-IMAGE - PWW 2.5
+![Image PWW 2.5 - Has Tilted Too Far](https://github.com/Xakaiczar/Portfolio/blob/main/images/PWW/PWW%20-%202.5.png)
 
 The function above - `HasTiltedTooFar` - calls `GetTiltAngle` and passes the result to `GetTiltBounds` (more on that later!). The `MinTilt` and `MaxTilt` are then compared with the rotation of the prop; if the prop's rotation on the `x` _or_ `y` axis falls outside the safe range and into the fallen range of `MinTilt < n < MaxTilt`, then it will be flagged as "fallen" in the `Main` blueprint.
 
@@ -141,11 +141,11 @@ For example, the pallet prop was imported lying flat (as one would expect a pall
 
 It took me an embarrassingly long time to figure out, but this is effectively what is happening and how I visualised it:
 
-IMAGE - PWW 2.6
+![Image PWW 2.6 - Barrel Pallet](https://github.com/Xakaiczar/Portfolio/blob/main/images/PWW/PWW%20-%202.6.png)
 
 Now relate that to the graph from earlier (here it is again, for your reference):
 
-IMAGE - PWW 2.7
+![Image PWW 2.7 - Barrel Pallet with Graph](https://github.com/Xakaiczar/Portfolio/blob/main/images/PWW/PWW%20-%202.7.png)
 
 Frustratingly, an object lying parallel with the floor appears to be the _complete opposite_ of their upright, perpendicular counterparts: when they are within the safe tilt bounds, they are actually _closer_ to the floor than when they should be "falling".
 
@@ -181,7 +181,7 @@ If you're a smarter person than me, you may have noticed that all my calculation
 
 Clearly, some objects were basically the same upside-down, so they needed to have _two_ safe zones: one around 0 degrees, and one around 180 degrees. I made `GetTiltAngle` to represent this:
 
-IMAGE - PWW 2.8
+![Image PWW 2.8 - Gelt Tilt Angle](https://github.com/Xakaiczar/Portfolio/blob/main/images/PWW/PWW%20-%202.8.png)
 
 This then gets fed into `GetTiltBounds`, where it... _just works_...
 
