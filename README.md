@@ -15,6 +15,7 @@ _Developed with Unreal Engine 5_
     - [Prop Vision](#prop-vision)
     - [The Player](#the-player)
     - [GUI](#gui)
+    - [Main](#main)
     - [Conclusion](#conclusion)
 - [Summary](#summary)
 
@@ -80,7 +81,7 @@ What's happening when an object is falling over? Well, mathematically, it's rota
 
 Using this, we can actually determine whether a prop has fallen over or not by its angular tilt!
 
-![Image PWW 2.1 - Angular Tilt Graph](https://github.com/Xakaiczar/Portfolio/blob/main/images/PWW/PWW%20-%202.1.png)
+![Image PWW 2.01 - Angular Tilt Graph](https://github.com/Xakaiczar/Portfolio/blob/main/images/PWW/PWW%20-%202.01.png)
 > (_a_ < n < 360 - _a_, where _a_ is the angular tilt)
 
 The idea here is that a prop must rotate by an angle of _`a`_ before it starts falling with no hope of return. Inversely, this means that any prop with an `x` or `y` rotation of _`a`_ degrees or lower must still be stood up, to some degree (no pun intended...).
@@ -89,17 +90,17 @@ This is then mirrored on the other side, as an angle of _`-a`_ will cause it to 
 
 I decided on a default angular tilt value of 45 degrees for both axes:
 
-![Image PWW 2.2 - Angular Tilt Graph Filled](https://github.com/Xakaiczar/Portfolio/blob/main/images/PWW/PWW%20-%202.2.png)
+![Image PWW 2.02 - Angular Tilt Graph Filled](https://github.com/Xakaiczar/Portfolio/blob/main/images/PWW/PWW%20-%202.02.png)
 
 As you can see from the figure above and the image below, this number was not arbitrary; it falls exactly between perfectly upright and perfectly fallen:
 
-![Image PWW 2.3 - Angular Tilt Barrel](https://github.com/Xakaiczar/Portfolio/blob/main/images/PWW/PWW%20-%202.3.png)
+![Image PWW 2.03 - Angular Tilt Barrel](https://github.com/Xakaiczar/Portfolio/blob/main/images/PWW/PWW%20-%202.03.png)
 
 Maybe 45 degrees is a bit too large for some props, but it gets the job done; for now, that's all that matters. We can fine-tune it on a case-by-case basis later.
 
 To determine if a prop has fallen, we need to get these boundaries. I wrote this function called `GetTiltBounds`:
 
-![Image PWW 2.4 - Get Tilt Bounds](https://github.com/Xakaiczar/Portfolio/blob/main/images/PWW/PWW%20-%202.4.png)
+![Image PWW 2.04 - Get Tilt Bounds](https://github.com/Xakaiczar/Portfolio/blob/main/images/PWW/PWW%20-%202.04.png)
 
 This function takes in one parameter - `Angle`, which we'll get to later, but defaults to `360` - and returns two values: a `MinTilt` and a `MaxTilt`. While not very well named, these return values are the upper and lower bounds for the prop's rotation. In other words, the prop must be between `MinTilt` and `MaxTilt` to be considered "fallen".
 
@@ -119,7 +120,7 @@ The smallest of the two values is passed to `MinTilt`, and the largest is passed
 
 These values get passed into a much more convoluted function:
 
-![Image PWW 2.5 - Has Tilted Too Far](https://github.com/Xakaiczar/Portfolio/blob/main/images/PWW/PWW%20-%202.5.png)
+![Image PWW 2.05 - Has Tilted Too Far](https://github.com/Xakaiczar/Portfolio/blob/main/images/PWW/PWW%20-%202.05.png)
 
 The function above - `HasTiltedTooFar` - calls `GetTiltAngle` and passes the result to `GetTiltBounds` (more on that later!). The `MinTilt` and `MaxTilt` are then compared with the rotation of the prop; if the prop's rotation on the `x` _or_ `y` axis falls outside the safe range and into the fallen range of `MinTilt < n < MaxTilt`, then it will be flagged as "fallen" in the `Main` blueprint.
 
@@ -142,11 +143,11 @@ For example, the pallet prop was imported lying flat (as one would expect a pall
 
 It took me an embarrassingly long time to figure out, but this is effectively what is happening and how I visualised it:
 
-![Image PWW 2.6 - Barrel Pallet](https://github.com/Xakaiczar/Portfolio/blob/main/images/PWW/PWW%20-%202.6.png)
+![Image PWW 2.06 - Barrel Pallet](https://github.com/Xakaiczar/Portfolio/blob/main/images/PWW/PWW%20-%202.06.png)
 
 Now relate that to the graph from earlier (here it is again, for your reference):
 
-![Image PWW 2.7 - Barrel Pallet with Graph](https://github.com/Xakaiczar/Portfolio/blob/main/images/PWW/PWW%20-%202.7.png)
+![Image PWW 2.07 - Barrel Pallet with Graph](https://github.com/Xakaiczar/Portfolio/blob/main/images/PWW/PWW%20-%202.07.png)
 
 Frustratingly, an object lying parallel with the floor appears to be the _complete opposite_ of their upright, perpendicular counterparts: when they are within the safe tilt bounds, they are actually _closer_ to the floor than when they should be "falling".
 
@@ -182,7 +183,7 @@ If you're a smarter person than me, you may have noticed that all my calculation
 
 Clearly, some objects were basically the same upside-down, so they needed to have _two_ safe zones: one around 0 degrees, and one around 180 degrees. I made `GetTiltAngle` to represent this:
 
-![Image PWW 2.8 - Gelt Tilt Angle](https://github.com/Xakaiczar/Portfolio/blob/main/images/PWW/PWW%20-%202.8.png)
+![Image PWW 2.08 - Gelt Tilt Angle](https://github.com/Xakaiczar/Portfolio/blob/main/images/PWW/PWW%20-%202.08.png)
 
 This then gets fed into `GetTiltBounds`, where it... _just works_...
 
@@ -203,13 +204,13 @@ If that were to happen, they could end up flying off into the sunset, spinning f
 
 I set some upper and lower bounds in the main blueprint to combat this, passing them into `HasFallenOutOfBounds` in `BP_Prop`:
 
-IMG - PWW 2.09
+![Image PWW 2.09 - Has Fallen Out Of Bounds](https://github.com/Xakaiczar/Portfolio/blob/main/images/PWW/PWW%20-%202.09.png)
 
 As always, the mess of cables makes this code harder to follow than it is. In short, if the `x`, `y`, or `z` components of the prop's `Transform` location are smaller than their respective high or low bounds, then the function returns `true`.
 
 This was added to `HasFallen`, a function that combines both `HasFallenOutOfBounds` and `HasTiltedTooFar`.
 
-IMG - PWW 2.10
+![Image PWW 2.10 - Has Fallen](https://github.com/Xakaiczar/Portfolio/blob/main/images/PWW/PWW%20-%202.10.png)
 
 Now, once a prop falls out of range of those bounds, it counts as fallen.
 
@@ -219,7 +220,7 @@ While they do despawn eventually, it felt a bit buggy. It didn't stop the player
 
 To fix this, I simply teleport any object that falls out of range to a point that's _just_ out of range:
 
-IMG - PWW 2.11
+![Image PWW 2.11 - Keep Props In Bounds](https://github.com/Xakaiczar/Portfolio/blob/main/images/PWW/PWW%20-%202.11.png)
 
 This function - `KeepPropsInBounds` - iterates through all the props and sets the location of any out-of-bounds props to `100` units outside the low bounds in all 3 directions. That prop is then held there indefinitely.
 
