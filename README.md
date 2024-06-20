@@ -196,13 +196,7 @@ So those values are still _used_ properly, it's just that all but the first fuse
 Maybe I'm just too ill to understand this at the moment. I think I'll need to give it a look-over another time...
 
 ### Falling Through
-But what if, hypothetically, something went flying out the window...?
-
-IMAGE OF THAT
-
-Or, I don't know, through the floor...?
-
-IMAGE OF THAT TOO
+But what if, hypothetically, something went flying out the window? Or, I don't know, _through the floor_...?
 
 If that were to happen, they could end up flying off into the sunset, spinning forever. This could result in an unwinnable game state, as the flying objects constantly rotate between fallen and upright. No bueno.
 
@@ -214,14 +208,27 @@ Then, once a prop falls out of range of those bounds, it counts as fallen.
 
 IMG OF BP
 
-They do despawn at some point...
+While they do despawn eventually, it felt a bit buggy. It didn't stop the player from completing the game, but it didn't feel like a good user experience; if the player was unaware of the bug, how were they to know which prop had suddenly despawned?
 
-IMG OF NUMBER GOING DOWN?
+To fix this, I simply teleport any object that falls out of range to a point that's _just_ out of range:
 
-But it doesn't affect the completion rate, so that's good.
+IMG OF BP
+
+And with that (and probably some code explanations!) all props are present and accounted for!
+
+### Prop Vision
+Some props aren't obviously upright; helps find them.
+
+Looks like this:
+
+IMG OF BP
+
+Swaps textures out for a short while before resetting. Also changes live as props go in and out of states.
 
 ### The Player
-I had to extract the projectile method from the main blueprint into the player in order to fetch the variables for the UI. However, to do that, I'd need to have a player in the first place...
+You may have noticed that I use a player blueprint, while the original course doesn't include one, instead opting to add their code to the level blueprint instead.
+
+I wanted to factor out the player code from the level code, mostly just to keep my code clean. However, to do that, I'd need to have a player in the first place...
 
 I went the easy route: I decided to import the First Person Example Level assets through the content window.
 
@@ -237,7 +244,9 @@ I just kept the players within the same box as the props by resetting the level 
 
 IMG OF BP
 
-In hindsight, I probably should've let them continue from where they left off. Maybe in the next update...
+In hindsight, I probably should've let them continue from where they left off. That sounds like a better (and less frustrating!) player experience. Or maybe - on certain maps - that's part of the challenge...
+
+Either way, it's something to think about as I make new levels!
 
 ### GUI
 The last thing it really needed to feel like a _game_ was a HUD.
@@ -247,6 +256,10 @@ IMAGE OF HUD
 I not only included an ammo count so the player could manage their ammo carefully and avoid defeat, but also a prop count so they would know if they were close to winning. These numbers are variable - as you'd expect - and connect directly to the player.
 
 IMAGE OF BP
+
+This gives the player direct feedback about how close they are to reaching or failing their primary objective, a critical piece of information for a satisfying experience.
+
+I also added a sidebar to help the player with controls; while some of it is intuitive (e.g. WASD to walk, or LMB to shoot), there may be functionality they otherwise wouldn't know about (e.g. RMB for "Prop Vision").
 
 Then, for the finishing touches, I added a win screen:
 
