@@ -12,6 +12,7 @@ _Developed with Unreal Engine 5_
   - [My Contribution](#my-contribution)
     - [Falling Over](#falling-over)
     - [Falling Through](#falling-through)
+    - [Prop Vision](#prop-vision)
     - [The Player](#the-player)
     - [GUI](#gui)
     - [Conclusion](#conclusion)
@@ -200,21 +201,29 @@ But what if, hypothetically, something went flying out the window? Or, I don't k
 
 If that were to happen, they could end up flying off into the sunset, spinning forever. This could result in an unwinnable game state, as the flying objects constantly rotate between fallen and upright. No bueno.
 
-I set some upper and lower bounds in the main blueprint to combat this.
+I set some upper and lower bounds in the main blueprint to combat this, passing them into `HasFallenOutOfBounds` in `BP_Prop`:
 
-IMG OF BP
+IMG - PWW 2.09
 
-Then, once a prop falls out of range of those bounds, it counts as fallen.
+As always, the mess of cables makes this code harder to follow than it is. In short, if the `x`, `y`, or `z` components of the prop's `Transform` location are smaller than their respective high or low bounds, then the function returns `true`.
 
-IMG OF BP
+This was added to `HasFallen`, a function that combines both `HasFallenOutOfBounds` and `HasTiltedTooFar`.
+
+IMG - PWW 2.10
+
+Now, once a prop falls out of range of those bounds, it counts as fallen.
+
+The issue now is, once they fall out of range, they _keep_ falling.
 
 While they do despawn eventually, it felt a bit buggy. It didn't stop the player from completing the game, but it didn't feel like a good user experience; if the player was unaware of the bug, how were they to know which prop had suddenly despawned?
 
 To fix this, I simply teleport any object that falls out of range to a point that's _just_ out of range:
 
-IMG OF BP
+IMG - PWW 2.11
 
-And with that (and probably some code explanations!) all props are present and accounted for!
+This function - `KeepPropsInBounds` - iterates through all the props and sets the location of any out-of-bounds props to `100` units outside the low bounds in all 3 directions. That prop is then held there indefinitely.
+
+And with that all props are present and accounted for!
 
 ### Prop Vision
 Some props aren't obviously upright; helps find them.
@@ -268,6 +277,11 @@ WIN SCREEN IMG
 And a game over screen:
 
 GO SCREEN IMG
+
+### Main
+Tying it all together!
+
+I have a lot of for-each loops that probably need condensing.
 
 ### Conclusion
 With the addition of a proper win condition and a HUD that clearly communicates the state of the game with the player, it actually feels like a game. It still has a lot of room for improvement though! Maybe I'll revisit this project when I'm a little better trained.
