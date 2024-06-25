@@ -227,13 +227,41 @@ This function - `KeepPropsInBounds` - iterates through all the props and sets th
 And with that all props are present and accounted for!
 
 ### Prop Vision
-Some props aren't obviously upright; helps find them.
+I realised while playing that some props aren't obviously upright. For example, the hose looks pretty similar both upright and upside down, and sometimes an upright object can be hidden in a pile of fallen objects.
 
-Looks like this:
+I wrote a function in the `Main` that helps the player identify all the props that are still upright:
 
-IMG OF BP
+IMG - PWW 2.12
 
-Swaps textures out for a short while before resetting. Also changes live as props go in and out of states.
+This function iterates through all the props, identifies whether they're upright or not using the `IsFallen` function in `BP_Prop`, then changing the material based on the result.
+
+The two materials it alternates between are the `HighlightedProp` material and the `DefaultMaterial`. `HighlightedProp` is a custom material I made that turns the props red and slightly transparent, emitting a slight glow to help the upright prop stand apart from the rest of the world. The `DefaultMaterial` is the original material of the prop, with each `BP_Prop` storing their default material in a variable at the start of the game:
+
+IMG - PWW 2.13
+
+With that, the upright props all glow as intended!
+
+However, as it is, the upright props would always be highlighted, which takes some of the fun out of the game. The highlight is supposed to be a _hint_, not a solution, so the material change should be temporary.
+
+I tagged `HighlightStandingProps` to the end of a new function, `SetPropMaterials`:
+
+IMG - PWW 2.14
+
+Starting at the end of the function, it swaps between the `HighlightStandingProps` function and another function that iterates through all the props and reverts them back to their `DefaultMaterial`.
+
+A new variable - `HighlightActive` - stores whether or not the prop highlight is active, and its value is passed into branch; if it's true, `HighlightStandingProps` is called, otherwise the props are returned to normal.
+
+To make sure they don't stay highlighted forever, the function starts by updating a `Counter` variable, which ticks upwards every frame. Once that counter reaches `3` (or, in other words, when 3 seconds have elapsed), `HighlightActive` is automatically set to `false`.
+
+Finally, to kick off the whole procedure, we have the triggering code in the `Main` blueprint:
+
+IMG - PWW 2.15
+
+When the right mouse button is pressed, the `Counter` is reset and the highlight function is activated.
+
+There we have it! The game now swaps textures out for a few seconds to give the player a hint before resetting. It also has the added bonus of dynamic material changing; as props move from upright to fallen to upright again, their materials reflect whether their state.
+
+In future, it may be a good idea to create some conditions on this ability. For example, knocking over 5 props might unlock a single use of this ability, or perhaps the player gets unlimited uses once they have less than 10 ammo remaining. Maybe we'll see more on this in the future!
 
 ### The Player
 You may have noticed that I use a player blueprint, while the original course doesn't include one, instead opting to add their code to the level blueprint instead.
