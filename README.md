@@ -229,15 +229,15 @@ And with that all props are present and accounted for!
 ### Prop Vision
 I realised while playing that some props aren't obviously upright. For example, the hose looks pretty similar both upright and upside down, and sometimes an upright object can be hidden in a pile of fallen objects.
 
-I wrote a function in the `Main` that helps the player identify all the props that are still upright:
+I wrote a function in `Main` that helps the player identify all the props that are still upright:
 
-IMG - PWW 2.12
+![Image PWW 2.12 - Highlight Standing Props](https://github.com/Xakaiczar/Portfolio/blob/main/images/PWW/PWW%20-%202.12.png)
 
-This function iterates through all the props, identifies whether they're upright or not using the `IsFallen` function in `BP_Prop`, then changing the material based on the result.
+This function iterates through all the props, identifies whether they're upright or not using the `IsFallen` function in `BP_Prop`, then changes the material based on the result.
 
 The two materials it alternates between are the `HighlightedProp` material and the `DefaultMaterial`. `HighlightedProp` is a custom material I made that turns the props red and slightly transparent, emitting a slight glow to help the upright prop stand apart from the rest of the world. The `DefaultMaterial` is the original material of the prop, with each `BP_Prop` storing their default material in a variable at the start of the game:
 
-IMG - PWW 2.13
+![Image PWW 2.13 - BP_Prop Begin Play](https://github.com/Xakaiczar/Portfolio/blob/main/images/PWW/PWW%20-%202.13.png)
 
 With that, the upright props all glow as intended!
 
@@ -245,21 +245,21 @@ However, as it is, the upright props would always be highlighted, which takes so
 
 I tagged `HighlightStandingProps` to the end of a new function, `SetPropMaterials`:
 
-IMG - PWW 2.14
+![Image PWW 2.14 - Set Prop Materials](https://github.com/Xakaiczar/Portfolio/blob/main/images/PWW/PWW%20-%202.14.png)
 
-Starting at the end of the function, it swaps between the `HighlightStandingProps` function and another function that iterates through all the props and reverts them back to their `DefaultMaterial`.
+At the end of the function, it swaps between the `HighlightStandingProps` function and another function that iterates through all the props and reverts them back to their `DefaultMaterial`.
 
-A new variable - `HighlightActive` - stores whether or not the prop highlight is active, and its value is passed into branch; if it's true, `HighlightStandingProps` is called, otherwise the props are returned to normal.
+A new variable - `HighlightActive` - stores whether or not prop vision is active, and its value is passed into the branch; if it's true, `HighlightStandingProps` is called, otherwise the props are returned to normal.
 
 To make sure they don't stay highlighted forever, the function starts by updating a `Counter` variable, which ticks upwards every frame. Once that counter reaches `3` (or, in other words, when 3 seconds have elapsed), `HighlightActive` is automatically set to `false`.
 
 Finally, to kick off the whole procedure, we have the triggering code in the `Main` blueprint:
 
-IMG - PWW 2.15
+![Image PWW 2.15 - RMB in Main Blueprint](https://github.com/Xakaiczar/Portfolio/blob/main/images/PWW/PWW%20-%202.15.png)
 
 When the right mouse button is pressed, the `Counter` is reset and the highlight function is activated.
 
-There we have it! The game now swaps textures out for a few seconds to give the player a hint before resetting. It also has the added bonus of dynamic material changing; as props move from upright to fallen to upright again, their materials reflect whether their state.
+There we have it! The game now swaps textures out for a few seconds to give the player a hint before resetting. It also has the added bonus of dynamic material changing; as props move from upright to fallen to upright again, their materials reflect the state they're in.
 
 In future, it may be a good idea to create some conditions on this ability. For example, knocking over 5 props might unlock a single use of this ability, or perhaps the player gets unlimited uses once they have less than 10 ammo remaining. Maybe we'll see more on this in the future!
 
