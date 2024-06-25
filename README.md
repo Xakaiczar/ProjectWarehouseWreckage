@@ -41,8 +41,6 @@ First, I made a projectile with a simple sphere in a silver colour. This sphere 
 Before we can fire a projectile, one needs to be spawned into the world. Using a reference to the projectile blueprint made in the previous step, an instance of that class is created in the `BP_FirstPersonCharacter` blueprint and spawned in the world just ahead of the player's location using `SpawnActor` (100 units in the forward direction).
 
 ![Image PWW 1.2 - Blueprint function for SpawnProjectile](https://github.com/Xakaiczar/Portfolio/blob/main/images/PWW/PWW%20-%201.2.png)
->[!NOTE]
->_Pictured above is a function called `SpawnProjectile`. In the current build however, `SpawnProjectile` no longer calls `Launch`. Both of these functions - as well as `DecreaseAmmo` - are instead sequentially called in `FireProjectile`. I will update images and descriptions when I have time, but it works fundamentally the same, it was just a simple refactor._
 
 The projectile is then fired using the `Launch` function. It is given an impulse, which is the force over a time period required to produce momentum, causing the projectile to fly away from the player. This impulse is determined by finding the forward vector of the projectile, then multiplying that by a value that - in hindsight - should've been a variable. I'll fix that later.
 
@@ -264,27 +262,29 @@ There we have it! The game now swaps textures out for a few seconds to give the 
 In future, it may be a good idea to create some conditions on this ability. For example, knocking over 5 props might unlock a single use of this ability, or perhaps the player gets unlimited uses once they have less than 10 ammo remaining. Maybe we'll see more on this in the future!
 
 ### The Player
-You may have noticed that I use a player blueprint, while the original course doesn't include one, instead opting to add their code to the level blueprint instead.
+You may have noticed that I have a blueprint for the player, while the original course doesn't include one, instead opting to add their code to the `Main` level blueprint instead.
 
 I wanted to factor out the player code from the level code, mostly just to keep my code clean. However, to do that, I'd need to have a player in the first place...
 
 I went the easy route: I decided to import the First Person Example Level assets through the content window.
 
-I moved the SpawnProjectile code over, refactored it, and exposed the ammo for the UI:
+I moved the `SpawnProjectile` code over and refactored it into a new function, `FireProjectile`:
 
-IMG OF THAT
+IMG - PWW 2.16
 
-Last, but by no means least, I prevented players from doing a Tommen Baratheon...
+As you can see, I made some changes to the original (see [above](https://github.com/Xakaiczar/ProjectWarehouseWreckage/main/README.md#the-original-project)). First of all, I removed `Launch` from `SpawnProjectile`, so each function does only what it says on the tin: the first spawns the projectile into the world, the second launches it from the player.
 
-GIF IF I CAN FIND ONE OR JUST GAME FOOTAGE
+Secondly, I updated `DecreaseAmmo`:
 
-I just kept the players within the same box as the props by resetting the level after they leave it.
+IMG - PWW 2.17
 
-IMG OF BP
+I edited it slightly, so the `ammo` could not drop below `0`.
 
-In hindsight, I probably should've let them continue from where they left off. That sounds like a better (and less frustrating!) player experience. Or maybe - on certain maps - that's part of the challenge...
+Now, on left click, `FireProjectile` is called instead:
 
-Either way, it's something to think about as I make new levels!
+IMG - PWW 2.18
+
+This concluded the refactor, now the player blueprint has total control over the firing code.
 
 ### GUI
 The last thing it really needed to feel like a _game_ was a HUD.
@@ -311,6 +311,18 @@ GO SCREEN IMG
 Tying it all together!
 
 I have a lot of for-each loops that probably need condensing.
+
+Last, but by no means least, I prevented players from doing a Tommen Baratheon...
+
+GIF IF I CAN FIND ONE OR JUST GAME FOOTAGE
+
+I just kept the players within the same box as the props by resetting the level after they leave it.
+
+IMG OF BP
+
+In hindsight, I probably should've let them continue from where they left off. That sounds like a better (and less frustrating!) player experience. Or maybe - on certain maps - that's part of the challenge...
+
+Either way, it's something to think about as I make new levels!
 
 ### Conclusion
 With the addition of a proper win condition and a HUD that clearly communicates the state of the game with the player, it actually feels like a game. It still has a lot of room for improvement though! Maybe I'll revisit this project when I'm a little better trained.
