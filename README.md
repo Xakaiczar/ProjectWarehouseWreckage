@@ -291,23 +291,61 @@ This concluded the refactor, now the player blueprint has total control over the
 ### GUI
 The last thing it really needed to feel like a _game_ was a HUD.
 
-IMAGE OF HUD
+There's quite a bit of information that needs to be shared with the player so they can make informed decisions.
 
-I not only included an ammo count so the player could manage their ammo carefully and avoid defeat, but also a prop count so they would know if they were close to winning. These numbers are variable - as you'd expect - and connect directly to the player.
+But first, we need some reference to the player, which will be cached as soon as the game starts:
 
-IMAGE OF BP
+IMG - PWW 2.19
+> [!NOTE]
+> _It may be better to call this function every time - rather than calling once and caching - in case the reference ever becomes null._
 
-This gives the player direct feedback about how close they are to reaching or failing their primary objective, a critical piece of information for a satisfying experience.
+After a reference to the player is stored in `Character`, the "Game Over" screen is hidden. Obviously, we don't want a chance of that showing up until the game has actually finished!
 
-I also added a sidebar to help the player with controls; while some of it is intuitive (e.g. WASD to walk, or LMB to shoot), there may be functionality they otherwise wouldn't know about (e.g. RMB for "Prop Vision").
+Using the `Character` cached before, the HUD checks the player's ammo data to display the amount of ammo the player started with:
 
-Then, for the finishing touches, I added a win screen:
+IMG - PWW 2.20
 
-WIN SCREEN IMG
+And how much they have left:
 
-And a game over screen:
+IMG - PWW 2.21
 
-GO SCREEN IMG
+This information allows the player to manage their ammo carefully and avoid defeat. But that's only half the information they need; they also need a prop count, so they know if they are close to winning.
+
+Finding the total number of props is straightforward:
+
+IMG - PWW 2.22
+
+Finding the number of remaining props, maybe less so:
+
+IMG - PWW 2.23
+
+The logic is pretty simple, but there's a lot of repeated code that needs refactoring.
+
+`GetPropsRemaining` starts with a branch: if the player has won the game, then the HUD will be say there are no props remaining. This is because the HUD can appear glitchy if an object is still flying through the air, switching rapidly between 0 and 1. While it makes no functional difference, I felt that it made the game logic seem indecisive even after the player has won, which would likely lead to an ambivalent player experience.
+
+If the player has not won, the function will iterate through all the props in the game, incrementing `nProps` for each upright prop.
+
+Once the loop is complete, the value of `nProps` is returned, then displayed on the HUD as the number of props remaining upright.
+
+These functions give the player direct feedback about how close they are to reaching or failing their primary objective, a critical piece of information for a satisfying experience.
+
+I also added a sidebar to help the player with controls; while some of it is intuitive (e.g. WASD to walk, or LMB to shoot), there may be functionality they otherwise wouldn't know about (e.g. RMB for "Prop Vision"). Either way, it's better to be safe than sorry!
+
+I didn't want to clutter the screen however, so I made a simple show / hide function for the controls menu:
+
+IMG - PWW 2.24
+
+Calling `ToggleControlsMenu` inverts the boolean `IsTooltipOpen`, which then toggles between two paths: one which displays the full controls menu, and one which displays an abridged version.
+
+Then, for the finishing touches, I added a variable game over screen:
+
+IMG - PWW 2.25
+
+Using the same screen, the HUD displays a different message depending on whether the player won or lost.
+
+With that, the player has all the information they need. Hopefully this will reduce frustration, resulting in a better player experience.
+
+In the future, I may add a crosshair, or some indication of where the player is aiming. However, in my experience, not quite knowing was part of the fun! Otherwise, it didn't feel particularly challenging. That said, it may end up as an optional feature. After all, it's always nice to have the option!
 
 ### Main
 Tying it all together!
