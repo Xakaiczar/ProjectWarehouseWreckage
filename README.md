@@ -295,33 +295,33 @@ There's quite a bit of information that needs to be shared with the player so th
 
 But first, we need some reference to the player, which will be cached as soon as the game starts:
 
-IMG - PWW 2.19
+![Image PWW 2.19 - BP_HUD Construct](https://github.com/Xakaiczar/Portfolio/blob/main/images/PWW/PWW%20-%202.19.png)
 > [!NOTE]
-> _It may be better to call this function every time - rather than calling once and caching - in case the reference ever becomes null._
+> _It may be better to call this function every time - rather than calling once and caching - in case the reference ever becomes stale or null._
 
 After a reference to the player is stored in `Character`, the "Game Over" screen is hidden. Obviously, we don't want a chance of that showing up until the game has actually finished!
 
 Using the `Character` cached before, the HUD checks the player's ammo data to display the amount of ammo the player started with:
 
-IMG - PWW 2.20
+![Image PWW 2.20 - Get Max Ammo](https://github.com/Xakaiczar/Portfolio/blob/main/images/PWW/PWW%20-%202.20.png)
 
 And how much they have left:
 
-IMG - PWW 2.21
+![Image PWW 2.21 - Get Ammo Remaining](https://github.com/Xakaiczar/Portfolio/blob/main/images/PWW/PWW%20-%202.21.png)
 
 This information allows the player to manage their ammo carefully and avoid defeat. But that's only half the information they need; they also need a prop count, so they know if they are close to winning.
 
 Finding the total number of props is straightforward:
 
-IMG - PWW 2.22
+![Image PWW 2.22 - Get Total Number of Props](https://github.com/Xakaiczar/Portfolio/blob/main/images/PWW/PWW%20-%202.22.png)
 
 Finding the number of remaining props, maybe less so:
 
-IMG - PWW 2.23
+![Image PWW 2.23 - Get Props Remaining](https://github.com/Xakaiczar/Portfolio/blob/main/images/PWW/PWW%20-%202.23.png)
 
 The logic is pretty simple, but there's a lot of repeated code that needs refactoring.
 
-`GetPropsRemaining` starts with a branch: if the player has won the game, then the HUD will be say there are no props remaining. This is because the HUD can appear glitchy if an object is still flying through the air, switching rapidly between 0 and 1. While it makes no functional difference, I felt that it made the game logic seem indecisive even after the player has won, which would likely lead to an ambivalent player experience.
+`GetPropsRemaining` starts with a branch: if the player has won the game, then the HUD will say there are no props remaining. This is because the HUD can appear glitchy if an object is still flying through the air, switching rapidly between 0 and 1. While it makes no functional difference, I felt that it made the game logic seem indecisive even after the player has won, which would likely lead to an ambivalent player experience.
 
 If the player has not won, the function will iterate through all the props in the game, incrementing `nProps` for each upright prop.
 
@@ -333,13 +333,13 @@ I also added a sidebar to help the player with controls; while some of it is int
 
 I didn't want to clutter the screen however, so I made a simple show / hide function for the controls menu:
 
-IMG - PWW 2.24
+![Image PWW 2.24 - Toggle Controls Menu](https://github.com/Xakaiczar/Portfolio/blob/main/images/PWW/PWW%20-%202.24.png)
 
 Calling `ToggleControlsMenu` inverts the boolean `IsTooltipOpen`, which then toggles between two paths: one which displays the full controls menu, and one which displays an abridged version.
 
 Then, for the finishing touches, I added a variable game over screen:
 
-IMG - PWW 2.25
+![Image PWW 2.25 - Set End Screen](https://github.com/Xakaiczar/Portfolio/blob/main/images/PWW/PWW%20-%202.25.png)
 
 Using the same screen, the HUD displays a different message depending on whether the player won or lost.
 
