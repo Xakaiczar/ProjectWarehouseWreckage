@@ -15,7 +15,7 @@ _Developed with Unreal Engine 5_
     - [Prop Vision](#prop-vision)
     - [The Player](#the-player)
     - [GUI](#gui)
-    - [Main](#main)
+    - [Main](#the-main-level)
     - [Conclusion](#conclusion)
 - [Summary](#summary)
 
@@ -347,14 +347,44 @@ With that, the player has all the information they need. Hopefully this will red
 
 In the future, I may add a crosshair, or some indication of where the player is aiming. However, in my experience, not quite knowing was part of the fun! Otherwise, it didn't feel particularly challenging. That said, it may end up as an optional feature. After all, it's always nice to have the option!
 
-### Main
-Tying it all together!
+### The Main Level
+While I've talked through a lot of my code, I haven't shown much of the `Main` level blueprint, which ties it all together.
 
-I have a lot of for-each loops that probably need condensing.
+I've honestly been avoiding this one, as it's quite messy and could do with a _lot_ of refactoring in the future. I feel like this was the default place I put things as I was learning blueprint, which was likely a poor decision design-wise.
 
-Last, but by no means least, I prevented players from doing a Tommen Baratheon...
+When the game starts, the level tells the HUD to initialise:
 
-GIF IF I CAN FIND ONE OR JUST GAME FOOTAGE
+IMG - PWW 2.26
+
+This calls `SetupHUD`:
+
+IMG - PWW 2.27
+
+The function starts by creating the HUD and adding it to the viewport. The `HighBounds` and `LowBounds` are then passed in for `GetPropsRemaining`. It probably shouldn't work like this, but it does for now.
+
+Speaking of the HUD, the level blueprint also binds the `ToggleControlsMenu` function from `BP_HUD` to the `Tab` key:
+
+IMG - PWW 2.28
+
+The `R` key is also bound to a quick reload:
+
+IMG - PWW 2.29
+
+The function runs this code:
+
+IMG - PWW 2.30
+
+Which just opens the current level again.
+
+All that's left to talk about is `Tick`...
+
+IMG - PWW 2.31
+
+Oh boy...
+
+
+
+I prevented players from doing a Tommen Baratheon and falling to their doom.
 
 I just kept the players within the same box as the props by resetting the level after they leave it.
 
@@ -363,6 +393,8 @@ IMG OF BP
 In hindsight, I probably should've let them continue from where they left off. That sounds like a better (and less frustrating!) player experience. Or maybe - on certain maps - that's part of the challenge...
 
 Either way, it's something to think about as I make new levels!
+
+I have a lot of for-each loops that probably need condensing.
 
 ### Conclusion
 With the addition of a proper win condition and a HUD that clearly communicates the state of the game with the player, it actually feels like a game. It still has a lot of room for improvement though! Maybe I'll revisit this project when I'm a little better trained.
