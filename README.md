@@ -264,25 +264,27 @@ In future, it may be a good idea to create some conditions on this ability. For 
 ### The Player
 You may have noticed that I have a blueprint for the player, while the original course doesn't include one, instead opting to add their code to the `Main` level blueprint instead.
 
-I wanted to factor out the player code from the level code, mostly just to keep my code clean. However, to do that, I'd need to have a player in the first place...
+I wanted to factor out the player code from the level code. This was mostly just to keep my code clean, but it would also mean less repeated code if I ever wanted to add more levels in the future.
 
-I went the easy route: I decided to import the First Person Example Level assets through the content window.
+However, to refactor the code into my player, I'd need to have a player in the first place...
+
+I went the easy route: I decided to import the "First Person Example Level" assets through the content window.
 
 I moved the `SpawnProjectile` code over and refactored it into a new function, `FireProjectile`:
 
-IMG - PWW 2.16
+![Image PWW 2.16 - Fire Projectile](https://github.com/Xakaiczar/Portfolio/blob/main/images/PWW/PWW%20-%202.16.png)
 
-As you can see, I made some changes to the original (see [above](https://github.com/Xakaiczar/ProjectWarehouseWreckage/main/README.md#the-original-project)). First of all, I removed `Launch` from `SpawnProjectile`, so each function does only what it says on the tin: the first spawns the projectile into the world, the second launches it from the player.
+As you can see, I made some changes to the original (see [above](https://github.com/Xakaiczar/ProjectWarehouseWreckage/blob/main/README.md#the-original-project)). First of all, I removed `Launch` from `SpawnProjectile`, so each function does only what it says on the tin: the first spawns the projectile into the world, the second launches it from the player.
 
 Secondly, I updated `DecreaseAmmo`:
 
-IMG - PWW 2.17
+![Image PWW 2.17 - Decrease Ammo](https://github.com/Xakaiczar/Portfolio/blob/main/images/PWW/PWW%20-%202.17.png)
 
 I edited it slightly, so the `ammo` could not drop below `0`.
 
 Now, on left click, `FireProjectile` is called instead:
 
-IMG - PWW 2.18
+![Image PWW 2.18 - Player LMB Click](https://github.com/Xakaiczar/Portfolio/blob/main/images/PWW/PWW%20-%202.18.png)
 
 This concluded the refactor, now the player blueprint has total control over the firing code.
 
