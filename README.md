@@ -204,7 +204,7 @@ I set some upper and lower bounds in the main blueprint to combat this, passing 
 
 ![Image PWW 2.09 - Has Fallen Out Of Bounds](https://github.com/Xakaiczar/Portfolio/blob/main/images/PWW/PWW%20-%202.09.png)
 
-As always, the mess of cables makes this code harder to follow than it is. In short, if the `x`, `y`, or `z` components of the prop's `Transform` location are smaller than their respective high or low bounds, then the function returns `true`.
+As always, the mess of cables makes this code harder to follow than it is. In short, if the `x`, `y`, or `z` components of the prop's `Transform` location are outside their respective high or low bounds (i.e. higher than the high bound on that axis, or lower than the low bound on that axis), then the function returns `true`.
 
 This was added to `HasFallen`, a function that combines both `HasFallenOutOfBounds` and `HasTiltedTooFar`.
 
@@ -274,7 +274,7 @@ I moved the `SpawnProjectile` code over and refactored it into a new function, `
 
 ![Image PWW 2.16 - Fire Projectile](https://github.com/Xakaiczar/Portfolio/blob/main/images/PWW/PWW%20-%202.16.png)
 
-As you can see, I made some changes to the original (see [above](https://github.com/Xakaiczar/ProjectWarehouseWreckage/blob/main/README.md#the-original-project)). First of all, I removed `Launch` from `SpawnProjectile`, so each function does only what it says on the tin: the first spawns the projectile into the world, the second launches it from the player.
+As you can see, I made some changes to the original (see [above](#the-original-project)). First of all, I removed `Launch` from `SpawnProjectile`, so each function does only what it says on the tin: the first spawns the projectile into the world, the second launches it from the player.
 
 Secondly, I updated `DecreaseAmmo`:
 
@@ -382,22 +382,84 @@ IMG - PWW 2.31
 
 Oh boy...
 
+Let's start at the beginning:
 
+IMG - PWW 2.32
 
-I prevented players from doing a Tommen Baratheon and falling to their doom.
+Straight away, the level checks to see if the game is over (whether the player has won or lost is irrelevant right now). If the game is over, then the level stops performing functions on `Tick`. Otherwise, it carries on to the prop functions.
 
-I just kept the players within the same box as the props by resetting the level after they leave it.
+These have all been highlighted in previous sections. `SetPropMaterials` comes from [Prop Vision](#prop-vision) above, while `KeepPropsInBounds` was first described in [Falling Through](#falling-through).
 
-IMG OF BP
+`HaveAllPropsFallen` hasn't been shown before, but may be... _familiar_...
 
-In hindsight, I probably should've let them continue from where they left off. That sounds like a better (and less frustrating!) player experience. Or maybe - on certain maps - that's part of the challenge...
+IMG - PWW 2.33
 
-Either way, it's something to think about as I make new levels!
+You may be wondering: "How many times do you need to iterate through the same list of props and check if they've fallen?"
 
-I have a lot of for-each loops that probably need condensing.
+I ask myself the same question...
+
+As contradictory as it may sound, I actually think it can be _harder_ to visualise code in blueprint. Or, at the very least, it's _different_.
+
+In future, I'd like as few `For Each` loops as possible. But it is what it is for now.
+
+Tangent aside, you will see in the screenshot above that the return node has an output. If _any_ prop returns as not fallen, the function returns early with a value of `false`. If the loop concludes without any upright props found, then it concludes that all props must have fallen, returning `true`.
+
+This value then gets passed into the branch:
+
+IMG - PWW 2.34
+
+If all the props have fallen over then `GameOver` is set to `true`, thus stopping `Tick` from going any further in future calls. The victory message is shown on the HUD, then there's a short delay before the level is reloaded. In future, this may load the next level instead.
+
+So, what happens if any of the props are still upright?
+
+IMG - PWW 2.35
+
+Then we need to check if the _player_ has fallen off the map and reload the level if so.
+
+The graph for `HasPlayerFallen` is pretty simple:
+
+IMG - PWW 2.36
+
+Like with props, it simply checks to see if the `BP_FirstPersonCharacter` is within the high and low bounds. It mostly just prevents players from doing a Tommen Baratheon and jumping to their doom.
+
+In hindsight, I probably should've let them continue from where they left off. That sounds like a better (and less frustrating!) player experience. Or maybe - on certain maps - that's part of the challenge!
+
+Either way, it's something to think about as I make new levels.
+
+So, now we've established the player is in the room and there are props left to knock over. What happens next?
+
+IMG - PWW 2.37
+
+Finally! The end of this if / else nightmare we're trapped in!
+
+First, it checks to see if the player still has ammo; if they don't, that could be the end of the game!
+
+But sometimes, a player may use their last projectile to knock over the final prop, which I would still want to be a victory. So the level waits a few seconds before making this decision.
+
+After that time has elapsed, the current game state is evaluated. The truth table for the `NOR` gate looks something like this:
+> - If the player does not have ammo remaining and the game is not over, the player has lost (true) - the "Game Over" screen will show
+> - If the player does not have ammo remaining but the game is over, the player has either won with their last projectile or ran out _after_ the game ended (false) - the "Congratulations!" screen has already appeared
+> - If the player has ammo remaining and the game is not over, play continues as normal (false) - the player is still playing the game and hasn't triggered either condition
+> - If the player has ammo remaining and the game is over, the player has already won (false) - the "Congratulations!" screen has already appeared
+
+If this evaluates to `true`, then it runs the same 4 functions as when the player wins: `GameOver` is set to `true`, `ShowPlayerEndScreen` is called with a short delay before reloading. The only real difference here is that `HasWon` (a parameter on `ShowPlayerEndScreen`) is set to `false`.
+
+I normally would've condensed that series of functions into one for the sake of cleanliness and avoiding repetition, but it's impossible to put `Delay` inside other functions. In future builds, I may try to avoid `Delay` entirely, instead opting for something like the `Counter` that tracks the "Prop Vision" countdown.
+
+Needless to say, it could do with some work. A _lot_ of work. But that's the `Main` level blueprint in its entirety.
 
 ### Conclusion
-With the addition of a proper win condition and a HUD that clearly communicates the state of the game with the player, it actually feels like a game. It still has a lot of room for improvement though! Maybe I'll revisit this project when I'm a little better trained.
+I think this went okay! The code is a bit messy, but that's to be expected when trying something new. I can already see plenty of areas I want to fix and improvements I want to make, which is more important to me. While I'm a perfectionist at heart, I'm learning to appreciate the process, the small iterations that _lead_ to perfection (or close enough!).
+
+But _most_ importantly, I've taken a project that was barely a tech demo, and turned it into a full - albeit small - game!
+
+With the addition of a proper win condition and a HUD that clearly communicates the state of the game with the player, it actually _feels_ like a game. Plus, the addition of "Prop Vision" gives the player a little something extra to help them in their quest.
+
+It still has a lot of room for improvement though! More levels would obviously be great, as well as more features like ammo pickups or limited "Prop Vision". But even small quality of life tweaks, like optional crosshairs and a respawn on `HasPlayerFallen` instead of a reload. Maybe even some music or sound effects, once I know how to do that!
+
+Needless to say, I'll revisit this project when I'm a little better trained. Or maybe tomorrow! Even just by doing this in the first place, then explaining what I did and why, I feel like I'm already a little better than before.
+
+I really enjoyed working on this. I hope you've enjoyed playing and reading along!
 
 # Summary
 Thank you for reading! If you want to see more of my work, please check out my [portfolio](https://github.com/Xakaiczar/Portfolio), and if you have any questions or opportunities, please don't hesitate to drop me an [email](xaqatkins@virginmedia.com) or message me via [LinkedIn](https://www.linkedin.com/in/xaqatkins/)!
