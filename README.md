@@ -354,37 +354,37 @@ I've honestly been avoiding this one, as it's quite messy and could do with a _l
 
 When the game starts, the level tells the HUD to initialise:
 
-IMG - PWW 2.26
+![Image PWW 2.26 - Main Level Begin Play](https://github.com/Xakaiczar/Portfolio/blob/main/images/PWW/PWW%20-%202.26.png)
 
 This calls `SetupHUD`:
 
-IMG - PWW 2.27
+![Image PWW 2.27 - Setup HUD](https://github.com/Xakaiczar/Portfolio/blob/main/images/PWW/PWW%20-%202.27.png)
 
 The function starts by creating the HUD and adding it to the viewport. The `HighBounds` and `LowBounds` are then passed in for `GetPropsRemaining`. It probably shouldn't work like this, but it does for now.
 
 Speaking of the HUD, the level blueprint also binds the `ToggleControlsMenu` function from `BP_HUD` to the `Tab` key:
 
-IMG - PWW 2.28
+![Image PWW 2.28 - Main Level Tab Menu](https://github.com/Xakaiczar/Portfolio/blob/main/images/PWW/PWW%20-%202.28.png)
 
 The `R` key is also bound to a quick reload:
 
-IMG - PWW 2.29
+![Image PWW 2.29 - Main Level R Reload](https://github.com/Xakaiczar/Portfolio/blob/main/images/PWW/PWW%20-%202.29.png)
 
-The function runs this code:
+The function `ReloadLevel` runs this code:
 
-IMG - PWW 2.30
+![Image PWW 2.30 - Reload Level](https://github.com/Xakaiczar/Portfolio/blob/main/images/PWW/PWW%20-%202.30.png)
 
 Which just opens the current level again.
 
 All that's left to talk about is `Tick`...
 
-IMG - PWW 2.31
+![Image PWW 2.31 - Main Level Tick Full](https://github.com/Xakaiczar/Portfolio/blob/main/images/PWW/PWW%20-%202.31.png)
 
 Oh boy...
 
 Let's start at the beginning:
 
-IMG - PWW 2.32
+![Image PWW 2.32 - Main Level Tick p1](https://github.com/Xakaiczar/Portfolio/blob/main/images/PWW/PWW%20-%202.32.png)
 
 Straight away, the level checks to see if the game is over (whether the player has won or lost is irrelevant right now). If the game is over, then the level stops performing functions on `Tick`. Otherwise, it carries on to the prop functions.
 
@@ -392,33 +392,33 @@ These have all been highlighted in previous sections. `SetPropMaterials` comes f
 
 `HaveAllPropsFallen` hasn't been shown before, but may be... _familiar_...
 
-IMG - PWW 2.33
+![Image PWW 2.33 - Have All Props Fallen](https://github.com/Xakaiczar/Portfolio/blob/main/images/PWW/PWW%20-%202.33.png)
 
 You may be wondering: "How many times do you need to iterate through the same list of props and check if they've fallen?"
 
-I ask myself the same question...
+I ask myself the same question every time I open a function and see _another_ for-each loop...
 
 As contradictory as it may sound, I actually think it can be _harder_ to visualise code in blueprint. Or, at the very least, it's _different_.
 
-In future, I'd like as few `For Each` loops as possible. But it is what it is for now.
+In future, I'd like as few for-each loops as possible. But it is what it is for now.
 
 Tangent aside, you will see in the screenshot above that the return node has an output. If _any_ prop returns as not fallen, the function returns early with a value of `false`. If the loop concludes without any upright props found, then it concludes that all props must have fallen, returning `true`.
 
 This value then gets passed into the branch:
 
-IMG - PWW 2.34
+![Image PWW 2.34 - Main Level Tick p2](https://github.com/Xakaiczar/Portfolio/blob/main/images/PWW/PWW%20-%202.34.png)
 
 If all the props have fallen over then `GameOver` is set to `true`, thus stopping `Tick` from going any further in future calls. The victory message is shown on the HUD, then there's a short delay before the level is reloaded. In future, this may load the next level instead.
 
 So, what happens if any of the props are still upright?
 
-IMG - PWW 2.35
+![Image PWW 2.35 - Main Level Tick p3](https://github.com/Xakaiczar/Portfolio/blob/main/images/PWW/PWW%20-%202.35.png)
 
 Then we need to check if the _player_ has fallen off the map and reload the level if so.
 
 The graph for `HasPlayerFallen` is pretty simple:
 
-IMG - PWW 2.36
+![Image PWW 2.36 - Has Player Fallen](https://github.com/Xakaiczar/Portfolio/blob/main/images/PWW/PWW%20-%202.36.png)
 
 Like with props, it simply checks to see if the `BP_FirstPersonCharacter` is within the high and low bounds. It mostly just prevents players from doing a Tommen Baratheon and jumping to their doom.
 
@@ -428,7 +428,7 @@ Either way, it's something to think about as I make new levels.
 
 So, now we've established the player is in the room and there are props left to knock over. What happens next?
 
-IMG - PWW 2.37
+![Image PWW 2.37 - Main Level Tick p4](https://github.com/Xakaiczar/Portfolio/blob/main/images/PWW/PWW%20-%202.37.png)
 
 Finally! The end of this if / else nightmare we're trapped in!
 
@@ -437,8 +437,8 @@ First, it checks to see if the player still has ammo; if they don't, that could 
 But sometimes, a player may use their last projectile to knock over the final prop, which I would still want to be a victory. So the level waits a few seconds before making this decision.
 
 After that time has elapsed, the current game state is evaluated. The truth table for the `NOR` gate looks something like this:
-> - If the player does not have ammo remaining and the game is not over, the player has lost (true) - the "Game Over" screen will show
-> - If the player does not have ammo remaining but the game is over, the player has either won with their last projectile or ran out _after_ the game ended (false) - the "Congratulations!" screen has already appeared
+> - If the player does not have ammo remaining and the game is not already over, the player has lost (true) - the "Game Over" screen will show
+> - If the player does not have ammo remaining but the game is already over, the player has either won with their last projectile or ran out _after_ the game ended (false) - the "Congratulations!" screen has already appeared
 > - If the player has ammo remaining and the game is not over, play continues as normal (false) - the player is still playing the game and hasn't triggered either condition
 > - If the player has ammo remaining and the game is over, the player has already won (false) - the "Congratulations!" screen has already appeared
 
@@ -455,9 +455,9 @@ But _most_ importantly, I've taken a project that was barely a tech demo, and tu
 
 With the addition of a proper win condition and a HUD that clearly communicates the state of the game with the player, it actually _feels_ like a game. Plus, the addition of "Prop Vision" gives the player a little something extra to help them in their quest.
 
-It still has a lot of room for improvement though! More levels would obviously be great, as well as more features like ammo pickups or limited "Prop Vision". But even small quality of life tweaks, like optional crosshairs and a respawn on `HasPlayerFallen` instead of a reload. Maybe even some music or sound effects, once I know how to do that!
+It still has a lot of room for improvement though! More levels would obviously be great, as well as more features like ammo pickups or limited "Prop Vision". But even small quality of life tweaks, like optional crosshairs and a respawn on `HasPlayerFallen` instead of a reload, would go a long way. Maybe even some music or sound effects (once I know how to do that!)
 
-Needless to say, I'll revisit this project when I'm a little better trained. Or maybe tomorrow! Even just by doing this in the first place, then explaining what I did and why, I feel like I'm already a little better than before.
+I think it's fair to say I'll be revisiting this project when I'm a little better trained. Or maybe tomorrow! Even just by doing this in the first place, then explaining what I did and why, I feel like I'm already a little better than before.
 
 I really enjoyed working on this. I hope you've enjoyed playing and reading along!
 
